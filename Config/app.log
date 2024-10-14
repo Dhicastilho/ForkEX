@@ -1,0 +1,21 @@
+08:20 - SAMbot - CRITICAL - SAMbot | BotUpdater
+
+08:20 - SAMbot - CRITICAL - Instaciando o Navegador Automático.
+08:20 - SAMbot - CRITICAL - Navegador foi iniciado
+08:20 - SAMbot - CRITICAL - Conexão com o SISBR Analítico
+08:20 - SAMbot - CRITICAL - Autenticação automática iniciada
+08:20 - SAMbot - CRITICAL - Autenticação feita com sucesso
+08:20 - SAMbot - CRITICAL - O SISBR Analítico está carregando
+08:20 - SAMbot - CRITICAL - Processo iniciado: PAA
+08:20 - SAMbot - CRITICAL - Download iniciado para o relatório: iB1F977424E4B4EC794758CEF26984AB6
+08:22 - SAMbot - CRITICAL - O arquivo (AUTO) Metas de Sustentação PAA Diário foi baixado com sucesso
+08:23 - SAMbot - CRITICAL - Arquivos do PAA atualizados
+08:23 - SAMbot - CRITICAL - Processo iniciado: SAM-ETL
+08:23 - SAMbot - CRITICAL - Processo de atualização iniciado
+08:23 - SAMbot - CRITICAL - A Pasta Padrão foi limpa
+08:23 - SAMbot - CRITICAL - Iniciando o processo de download dos dados
+08:23 - SAMbot - CRITICAL - Download iniciado para o relatório: i13B4C4ED76584290876EB0C7242E2546
+08:24 - SAMbot - CRITICAL - O arquivo (AUTO) Metas de Sustentação Diário foi baixado com sucesso
+08:25 - SAMbot - CRITICAL - Processo de ETL finalizado
+08:25 - SAMbot - CRITICAL - SAM foi atualizado com sucesso em 05:29
+08:25 - SAMbot - CRITICAL - Processo de atualização finalizado com sucesso
