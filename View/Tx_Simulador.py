@@ -2,8 +2,7 @@ import streamlit as st
 import pandas as pd
 from Controllers.Export_PDF import Criar_PDF
 from Controllers.Sender import Sender_email
-
-taxa = 0.0
+from View.Tx_Diferenciada import Taxa_Diferenciada
 
 class Simulador():
     def __init__(self):
@@ -17,22 +16,30 @@ class Simulador():
         self.n_linha = ""
         self.prazo = ""
         self.nome = ""
-                
+
+        # Inicializa a tela ativa no estado da sessão (tela padrão: Simulação)
+        if 'tela_ativa' not in st.session_state:
+            st.session_state['tela_ativa'] = 'simulador'
+
     def mostrar_simulador(self):
         self.carregar_logo_e_titulo()
         self.inicializar_componentes()
         self.main()
+            
+    def gravar_valores(self):
+        # Salvar valores na sessão do Streamlit
+        st.session_state['taxa'] = self.tx_final
+        st.session_state['tabela'] = self.tabela
+        st.session_state['natureza'] = self.natureza
+        st.session_state['risco'] = self.risco
+        st.session_state['linha'] = self.linha
+        st.session_state['n_linha'] = self.n_linha
+        st.session_state['prazo'] = self.prazo
+        st.session_state['nome'] = self.nome
         
-    def gravar_tx_final(self):
-        global taxa 
-        taxa = self.tx_final
-        
-    def obter_tx_final(self):
-        return taxa
-    
     def carregar_logo_e_titulo(self):
         """Carrega o logo e o título da página."""
-        col1, col2, col3 = st.columns([0.4,0.1,1.5])
+        col1, col2, col3 = st.columns([0.4, 0.1, 1.5])
         col1.image('Images/Logo.png', width=100, use_column_width="always")
         col3.markdown("<h1 style='text-align: center; color: #C9D200;'>Taxas para a Concessão de Crédito</h1>", unsafe_allow_html=True)
 
@@ -82,7 +89,6 @@ class Simulador():
 
         # Gerencia as ações de exportar e enviar e-mail
         self.gerenciar_exportacao_e_envio_email()
-
         # Carrega o rodapé e o selo da página
         self.carregar_rodape_e_selo()
 
@@ -113,21 +119,25 @@ class Simulador():
         """Gerencia as ações de exportar o PDF e enviar o e-mail."""
          # Criação de colunas para centralizar os botões
         col1, col2, col3, col4 = st.columns([1, 1.25, 1, 1])
+        simul_salva = False
         
         with col2:
-            exportar = st.button('Exportar Simulação', on_click=self.gravar_tx_final)
-
+            exportar = st.button('Salvar Simulação', on_click=self.gravar_valores)
+            
             if exportar:
-                caminhpo_pdf = self.gerar_exportacao_pdf()
-                with open(caminhpo_pdf, "rb") as file:
-                            st.download_button('Baixar Arquivo', data=file, file_name=caminhpo_pdf)
-                
+                if self.campos_preenchidos():
+                    simul_salva = True
+                    caminhpo_pdf = self.gerar_exportacao_pdf()
+                    with open(caminhpo_pdf, "rb") as file:
+                                st.download_button('Baixar Arquivo', data=file, file_name=caminhpo_pdf)
+                    # Botão para alternar para a tela de Taxa Diferenciada
+                    
         with col3:
-            enviar_email = st.button('Enviar para o E-mail')
+            enviar_email = st.button('Enviar para Análise')
             
             if enviar_email:
                 self.enviar_simulacao_email()
-                
+                    
     def gerar_exportacao_pdf(self):
         """Exporta a simulação para PDF."""
         if self.campos_preenchidos():
@@ -156,13 +166,12 @@ class Simulador():
                     st.error(f"Ocorreu um erro ao enviar o e-mail: {e}")
 
     def enviar_email(self):
-        """Envia o e-mail usando a classe Sender_email."""
-        email_sender = Sender_email(nome_cooperado=self.nome, linha=self.linha, taxa=self.tx_final)
-        email_sender.enviar()
+        email = Sender_email(nome_cooperado=self.nome, linha=self.linha, taxa=self.tx_final)
+        return email.enviar()
 
     def campos_preenchidos(self):
         """Verifica se todos os campos necessários estão preenchidos."""
-        return all([self.nome, self.natureza, self.risco, self.linha, self.n_linha, self.prazo])
+        return all([self.nome, self.tabela, self.natureza, self.risco, self.linha, self.n_linha, self.prazo])
 
 if __name__ == "__main__":
     Simulador()

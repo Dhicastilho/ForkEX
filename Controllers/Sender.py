@@ -1,11 +1,14 @@
 import win32com.client as win32
 import os
 import datetime as dt
+import pythoncom
 from Controllers.Config_Con import Yaml_Con
+
+
 class Sender_email(Yaml_Con):
     def __init__(self, nome_cooperado, linha, taxa):
         Yaml_Con.__init__(self)
-        
+        pythoncom.CoInitialize()
         self.outlook = win32.Dispatch('outlook.application')
         self.nome_cooperado = nome_cooperado
         self.linha = linha
@@ -15,7 +18,13 @@ class Sender_email(Yaml_Con):
             current_dir = os.path.abspath(os.curdir)
             self.file_path = os.path.join(current_dir, 'Export', f'Simulação_{nome_cooperado[:20]}.pdf')
         except:
-            print("Falhar ao carregar o anexo do Logger")
+            print("Falhar ao carregar o anexo")
+            
+        try:
+            current_dir = os.path.abspath(os.curdir)
+            self.file_path_desc = os.path.join(current_dir, 'Export', f'Simulação_com_desc_{nome_cooperado[:20]}.pdf')
+        except:
+            print("Falhar ao carregar o anexo")
 
         self.hora = dt.datetime.now()
         self.hora = self.hora.strftime("%H:%M:%S %d-%m-%Y")
@@ -68,7 +77,7 @@ class Sender_email(Yaml_Con):
             <p style='font-family:Montserrat; font-size:110%'> {conteudo}</p>
             <p style='font-family:Montserrat; font-size:110%'> </p>
             """
-            email.Attachments.Add(self.file_path)
+            email.Attachments.Add(self.file_path_desc)
                 
             email.Send()
             print(f"Email Nº {i} para {nome} {email_dest} Enviado com sucesso! [OK]", "default")
