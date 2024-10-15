@@ -83,6 +83,7 @@ class APP_GUI(Login):
 
         # Verifica se o login foi feito e ajusta a tela ativa
         if st.session_state['logged_in']:
+            self.obter_dados_Usuarios()
             self.navegar_paginas()
             
         else:
@@ -105,22 +106,42 @@ class APP_GUI(Login):
         with page_container:
             # Limpa a barra lateral
             st.sidebar.empty()
+            
+            st.sidebar.markdown("### Informações da Agência")
+            st.sidebar.write(f"**Nome:** {st.session_state.get('nome', 'Nome não definido')}")
+            st.sidebar.write(f"**Agência:** {st.session_state.get('nome_pa', 'Agência não definido')} | Nº: {st.session_state.get('numero_pa', '999')}")
+            st.sidebar.write(f"**E-mail:** {st.session_state.get('email', 'E-mail não definido')}")
 
             # Sidebar menu para escolher a página
-            pag = st.sidebar.selectbox("Escolha a página", ["Simulação de Taxa", "Solicitar Desconto de Taxa", "Mesa de Precificação"])
+            pag = st.sidebar.selectbox("Escolha a página", ["Simulação de Taxa", "Solicitar Desconto de Taxa", "Mesa de Precificação", "Painel de Controle"])
 
             # Carrega as páginas com base na seleção
             if pag == "Simulação de Taxa":
                 self.mostrar_simulador()
                 st.session_state['tela_ativa'] = 'simulador'
                 
+                
             elif pag == "Solicitar Desconto de Taxa":
-                self.mostrar_tx_diferenciada()
-                st.session_state['tela_ativa'] = 'taxa_diferenciada'
+                try:
+                    self.mostrar_tx_diferenciada()
+                    st.session_state['tela_ativa'] = 'taxa_diferenciada'
+                except:
+                    st.warning("Nenhuma taxa encontrada. Por favor, simule uma taxa e tente novamente.")
+                
                 
             elif pag == "Mesa de Precificação":
                 self.mostrar_precificador()
                 st.session_state['tela_ativa'] = 'precificador'
+                
+            elif pag == "Painel de Controle" and st.session_state['perfil'] == "admin":
+                self.registrar_novo_usuario()
+                self.apagar_usuario()
+                self.editar_usuario()
+            
+                st.session_state['tela_ativa'] = 'reg_user'
+            
+            elif pag == "Painel de Controle" and st.session_state['perfil'] != "admin":
+               st.warning("Você não possui permissão para acessar esta página. Por favor, contate o administrador para solicitar acesso.")
 
     def mostrar_simulador(self):
         """Exibe a página de simulação de taxa"""

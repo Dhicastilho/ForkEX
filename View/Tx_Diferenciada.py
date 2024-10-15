@@ -13,7 +13,7 @@ class Taxa_Diferenciada():
         self.n_linha = n_linha
         self.prazo = prazo
         self.nome = nome
-        self.tx_minima = round(tx * 0.8, 2)
+        self.tx_minima = round(tx * 0.9, 2)
         self.tx_desconto = 0.00
         
     def gravar_valores(self):
