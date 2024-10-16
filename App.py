@@ -68,12 +68,12 @@ class APP_GUI(Login):
         # Initialize the session
         self.inicializar_sessao()
         self.simulador = None
+        
     def inicializar_sessao(self):
 
         if 'initialized' not in st.session_state:
             Tratar_Arquivos()  
             st.session_state['initialized'] = True
-        
         
         if 'logged_in' not in st.session_state:
             st.session_state['logged_in'] = False
@@ -83,7 +83,7 @@ class APP_GUI(Login):
 
         # Verifica se o login foi feito e ajusta a tela ativa
         if st.session_state['logged_in']:
-            self.obter_dados_Usuarios()
+            self.obter_dados_usuarios()
             self.navegar_paginas()
             
         else:
@@ -92,21 +92,19 @@ class APP_GUI(Login):
     def mostrar_login(self):
         """Exibe a tela de login e faz a navegação após o login"""
         if st.session_state['tela_ativa'] == 'login':
+            
             resultado_login = self.logar()
             if resultado_login:
                 st.session_state['logged_in'] = True
                 st.session_state['tela_ativa'] = 'simulador'
                 st.rerun()  # Redireciona para a tela principal após o login
-
+                
     def navegar_paginas(self):
         """Função para controlar a navegação entre as páginas"""
         # Usar um container para garantir que uma única página seja renderizada
         page_container = st.container()
 
-        with page_container:
-            # Limpa a barra lateral
-            st.sidebar.empty()
-            
+        with page_container:            
             st.sidebar.markdown("### Informações da Agência")
             st.sidebar.write(f"**Nome:** {st.session_state.get('nome', 'Nome não definido')}")
             st.sidebar.write(f"**Agência:** {st.session_state.get('nome_pa', 'Agência não definido')} | Nº: {st.session_state.get('numero_pa', '999')}")
@@ -134,6 +132,7 @@ class APP_GUI(Login):
                 st.session_state['tela_ativa'] = 'precificador'
                 
             elif pag == "Painel de Controle" and st.session_state['perfil'] == "admin":
+                self.mostrar_usuarios()
                 self.registrar_novo_usuario()
                 self.apagar_usuario()
                 self.editar_usuario()

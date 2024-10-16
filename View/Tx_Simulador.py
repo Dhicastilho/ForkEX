@@ -141,9 +141,17 @@ class Simulador():
     def gerar_exportacao_pdf(self):
         """Exporta a simulação para PDF."""
         if self.campos_preenchidos():
+            nome_ger = st.session_state['nome'] 
+            numero_pa = st.session_state['numero_pa']
+            nome_pa = st.session_state['nome_pa']
+            email = st.session_state['email']
+            
             with st.spinner("Gerando PDF..."):
                 try:
-                    caminho_pdf = self.exportar_pdf(self.tx_final, self.tabela, self.natureza, self.risco, self.linha, self.n_linha, self.prazo, self.nome)
+                    caminho_pdf = self.exportar_pdf(tx_final=self.tx_final, tabela=self.tabela, natureza=self.natureza, 
+                                                    risco=self.risco, linha=self.linha, n_linha=self.n_linha, prazo=self.prazo, 
+                                                    nome_cli=self.nome, nome_ger=nome_ger, num_pa=numero_pa, nome_pa=nome_pa, 
+                                                    email=email)
                     st.success("PDF gerado com sucesso!")
                     
                     return caminho_pdf
@@ -151,9 +159,11 @@ class Simulador():
                     st.error(f"Ocorreu um erro ao gerar o PDF: {e}")
 
     @staticmethod
-    def exportar_pdf(tx_final, tabela, natureza, risco, linha, n_linha, prazo, nome):
+    def exportar_pdf(tx_final, tabela, natureza, risco, linha, n_linha, prazo, nome_cli, nome_ger, nome_pa, num_pa, email):
         pdf = Criar_PDF()
-        return pdf.gerar_pdf(tx_final, tabela, natureza, risco, linha, n_linha, prazo, nome)
+        return pdf.gerar_pdf(tx_final=tx_final, tabela=tabela, natureza=natureza, risco=risco, 
+                             linha=linha, n_linha=n_linha, prazo=prazo, nome_cli=nome_cli, 
+                             nome_ger=nome_ger, nome_pa=nome_pa, num_pa=num_pa, email=email )
 
     def enviar_simulacao_email(self):
         """Envia a simulação por e-mail."""
