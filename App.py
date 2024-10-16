@@ -1,10 +1,11 @@
 import streamlit as st
-import win32com.client as win32
+import pandas as pd
 from View.Tx_Simulador import Simulador
 from View.Tx_Diferenciada import Taxa_Diferenciada
 from View.Tx_Precificador import Precificador
 from View.Login import Login
-from Controllers.Moving import Tratar_Arquivos
+from Controllers.Handler_Export import Lidar_Dir
+from Controllers.Query_Simulador import Simulacao
 
 # Set page configuration with sidebar hidden
 st.set_page_config(
@@ -18,12 +19,11 @@ st.set_page_config(
 st.markdown(
     """
     <style>
+    #MainMenu {visibility: hidden;}
+    footer {visibility: hidden;}
+    header {visibility: hidden;}
     .stApp {
         background-color: #161a1a !important;
-        color: #ffffff !important;
-    }
-    .css-1d391kg {
-        background-color: #1c1c1c !important;
         color: #ffffff !important;
     }
     h1, h2, h3 {
@@ -46,119 +46,112 @@ st.markdown(
         color: #ffffff !important;
         border: 2px solid #ffffff !important;
     }
-    input:focus, textarea:focus, select:focus {
-        outline: #ffffff !important;
-        box-shadow: #ffffff !important;
-        border-color: #ffffff !important;
-    }
-    .css-16huue1 {
-        color: #ffffff !important;
-    }
     </style>
     """,
     unsafe_allow_html=True
 )
 
-# Define the structure of the app GUI
-class APP_GUI(Login):
+class APP_GUI(Login, Simulacao):
     def __init__(self): 
+        Login.__init__(self)
+        Simulacao.__init__(self)
         
-        Login.__init__(self) 
-        
-        # Initialize the session
-        self.inicializar_sessao()
         self.simulador = None
+        self.inicializar_sessao()
         
     def inicializar_sessao(self):
-
-        if 'initialized' not in st.session_state:
-            Tratar_Arquivos()  
-            st.session_state['initialized'] = True
+        """Gerencia o estado da sessão de forma persistente"""
         
-        if 'logged_in' not in st.session_state:
-            st.session_state['logged_in'] = False
+        if 'reloaded' not in st.session_state:
+            st.session_state['reloaded'] = False
+            
+        if not st.session_state['reloaded']:
+            if 'logged_in' not in st.session_state:
+                st.session_state['logged_in'] = False
         
-        if 'tela_ativa' not in st.session_state:
-            st.session_state['tela_ativa'] = 'login'  
-
-        # Verifica se o login foi feito e ajusta a tela ativa
+            if 'tela_ativa' not in st.session_state:
+                st.session_state['tela_ativa'] = 'login'  
+                
+            st.session_state['reloaded'] = True
+        
         if st.session_state['logged_in']:
             self.obter_dados_usuarios()
+            Lidar_Dir(st.session_state['email'])
             self.navegar_paginas()
-            
         else:
             self.mostrar_login()
     
     def mostrar_login(self):
-        """Exibe a tela de login e faz a navegação após o login"""
-        if st.session_state['tela_ativa'] == 'login':
-            
-            resultado_login = self.logar()
-            if resultado_login:
-                st.session_state['logged_in'] = True
-                st.session_state['tela_ativa'] = 'simulador'
-                st.rerun()  # Redireciona para a tela principal após o login
-                
+        """Exibe a tela de login e redireciona após o login"""
+        resultado_login = self.logar()
+        if resultado_login:
+            st.session_state['logged_in'] = True
+            st.session_state['tela_ativa'] = 'simulador'
+            st.rerun()  # Garante que a navegação ocorra sem travamentos
+    
     def navegar_paginas(self):
-        """Função para controlar a navegação entre as páginas"""
-        # Usar um container para garantir que uma única página seja renderizada
-        page_container = st.container()
+        """Controla a navegação entre as páginas"""
+        st.sidebar.markdown("### Informações da Agência")
+        st.sidebar.write(f"**Nome:** {st.session_state.get('nome', 'Nome não definido')}")
+        st.sidebar.write(f"**Agência:** {st.session_state.get('nome_pa', 'Agência não definida')} | Nº: {st.session_state.get('numero_pa', '999')}")
+        st.sidebar.write(f"**E-mail:** {st.session_state.get('email', 'E-mail não definido')}")
 
-        with page_container:            
-            st.sidebar.markdown("### Informações da Agência")
-            st.sidebar.write(f"**Nome:** {st.session_state.get('nome', 'Nome não definido')}")
-            st.sidebar.write(f"**Agência:** {st.session_state.get('nome_pa', 'Agência não definido')} | Nº: {st.session_state.get('numero_pa', '999')}")
-            st.sidebar.write(f"**E-mail:** {st.session_state.get('email', 'E-mail não definido')}")
+        pag = st.sidebar.selectbox("Escolha a página", ["Simulação de Taxa", "Solicitar Desconto de Taxa", "Mesa de Precificação", "Painel de Controle"])
 
-            # Sidebar menu para escolher a página
-            pag = st.sidebar.selectbox("Escolha a página", ["Simulação de Taxa", "Solicitar Desconto de Taxa", "Mesa de Precificação", "Painel de Controle"])
+        if pag == "Simulação de Taxa":
+            self.mostrar_simulador()
+        elif pag == "Solicitar Desconto de Taxa":
+            self.mostrar_tx_diferenciada()
+        elif pag == "Mesa de Precificação":
+            self.mostrar_precificador()
+        elif pag == "Painel de Controle":
+            self.mostrar_painel_controle()
 
-            # Carrega as páginas com base na seleção
-            if pag == "Simulação de Taxa":
-                self.mostrar_simulador()
-                st.session_state['tela_ativa'] = 'simulador'
-                
-                
-            elif pag == "Solicitar Desconto de Taxa":
-                try:
-                    self.mostrar_tx_diferenciada()
-                    st.session_state['tela_ativa'] = 'taxa_diferenciada'
-                except:
-                    st.warning("Nenhuma taxa encontrada. Por favor, simule uma taxa e tente novamente.")
-                
-                
-            elif pag == "Mesa de Precificação":
-                self.mostrar_precificador()
-                st.session_state['tela_ativa'] = 'precificador'
-                
-            elif pag == "Painel de Controle" and st.session_state['perfil'] == "admin":
-                self.mostrar_usuarios()
-                self.registrar_novo_usuario()
-                self.apagar_usuario()
-                self.editar_usuario()
+        if st.sidebar.button("Sair"):
+            Lidar_Dir(st.session_state['email']).limpar_dir()
+            st.session_state.clear()
+            st.rerun()
             
-                st.session_state['tela_ativa'] = 'reg_user'
-            
-            elif pag == "Painel de Controle" and st.session_state['perfil'] != "admin":
-               st.warning("Você não possui permissão para acessar esta página. Por favor, contate o administrador para solicitar acesso.")
-
     def mostrar_simulador(self):
         """Exibe a página de simulação de taxa"""
-        self.simulador = Simulador()
+        if not self.simulador:
+            self.simulador = Simulador()
         self.simulador.mostrar_simulador()
-    
+        
+    def mostrar_todas_simulacao(self):
+        with st.container(border=True):
+            st.markdown("<h2 style='text-align: center; color: #C9D200;'>Simulações Registradas</h2>", unsafe_allow_html=True)
+            
+            try:
+                # Recupera todos os emails, nomes, números PA e nomes PA da tabela de usuários
+                simulacoes = self.ler_simulacao()
+                
+                if simulacoes:
+                    # Converte a lista de tuplas em um DataFrame do Pandas para exibição
+                    df = pd.DataFrame(simulacoes, columns=['n_sim', 'tx_final', 'tabela', 'natureza', 
+                                                           'risco', 'linha', 'n_linha', 'prazo', 'nome_cli', 
+                                                           'nome_ger', 'nome_pa', 'num_pa', 'email'])
+
+                    # Exibe a tabela com os usuários usando dataframe
+                    st.dataframe(df.style.hide(axis='index'), use_container_width=True)
+                else:
+                    st.warning("Nenhuma simulação cadastrada.")
+            except Exception as e:
+                st.error(f"Erro ao recuperar simulações: {str(e)}")
+        
     def mostrar_tx_diferenciada(self):
-        taxa = st.session_state['taxa'] 
-        tabela = st.session_state['tabela']
-        natureza =st.session_state['natureza']
-        risco = st.session_state['risco']
-        linha = st.session_state['linha']
-        n_linha = st.session_state['n_linha']
-        prazo = st.session_state['prazo']
-        nome = st.session_state['nome']
+        """Exibe a página de solicitação de desconto de taxa"""
+        taxa = st.session_state.get('taxa')
+        tabela = st.session_state.get('tabela')
+        natureza = st.session_state.get('natureza')
+        risco = st.session_state.get('risco')
+        linha = st.session_state.get('linha')
+        n_linha = st.session_state.get('n_linha')
+        prazo = st.session_state.get('prazo')
+        nome = st.session_state.get('nome')
         
         if all([nome, tabela, natureza, risco, linha, n_linha, prazo]):
-            tx_dif = Taxa_Diferenciada(tx=taxa, tabela=tabela, natureza=natureza, risco=risco, linha=linha, n_linha=n_linha, prazo=prazo, nome=nome)
+            tx_dif = Taxa_Diferenciada(tx=taxa, tabela=tabela, natureza=natureza, risco=risco, linha=linha, n_linha=n_linha, prazo=prazo, nome_cli=nome)
             tx_dif.mostrar_pagina()
         else:
             st.error("Necessário simular uma taxa antes de solicitar o desconto!")
@@ -167,6 +160,17 @@ class APP_GUI(Login):
         """Exibe a página de mesa de precificação"""
         precificador = Precificador()
         precificador.mostrar_precificador()
-            
+
+    def mostrar_painel_controle(self):
+        """Exibe o painel de controle, apenas para admins"""
+        if st.session_state.get('perfil') == 'admin':
+            self.mostrar_todas_simulacao()
+            self.mostrar_usuarios()
+            self.registrar_novo_usuario()
+            self.editar_usuario()
+            self.apagar_usuario()
+        else:
+            st.warning("Você não possui permissão para acessar esta página.")
+
 if __name__ == "__main__":
     APP_GUI()

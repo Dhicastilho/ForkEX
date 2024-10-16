@@ -55,7 +55,7 @@ class Criar_PDF():
         self.fpdf.cell(0, 10, f"Entre em Contato com seu gerente: {email}", ln=True)
         
         # Salvar PDF
-        pdf_path = f'Export/Simulação_{nome_cli[:20]}.pdf'
+        pdf_path = f'Export/{email}/Simulação_{nome_cli[:20]}.pdf'
         self.fpdf.output(pdf_path)
         
         # Retornar o caminho do PDF gerado
@@ -110,7 +110,7 @@ class Criar_PDF():
         self.fpdf.cell(0, 10, f"Entre em Contato com seu gerente: {email}", ln=True)
         
         # Salvar PDF
-        pdf_path = f'Export/Simulação_com_desc_{nome_cli[:20]}.pdf'
+        pdf_path = f'Export/{email}/Simulação_com_desc_{nome_cli[:20]}.pdf'
         self.fpdf.output(pdf_path)
         
         # Retornar o caminho do PDF gerado

@@ -6,23 +6,24 @@ from Controllers.Config_Con import Yaml_Con
 
 
 class Sender_email(Yaml_Con):
-    def __init__(self, nome_cooperado, linha, taxa):
+    def __init__(self, nome_cooperado, linha, taxa, email):
         Yaml_Con.__init__(self)
         pythoncom.CoInitialize()
         self.outlook = win32.Dispatch('outlook.application')
         self.nome_cooperado = nome_cooperado
         self.linha = linha
         self.taxa = taxa
+        self.email = email
         
         try:
             current_dir = os.path.abspath(os.curdir)
-            self.file_path = os.path.join(current_dir, 'Export', f'Simulação_{nome_cooperado[:20]}.pdf')
+            self.file_path = os.path.join(current_dir, 'Export', self.email  ,f'Simulação_{nome_cooperado[:20]}.pdf')
         except:
             print("Falhar ao carregar o anexo")
             
         try:
             current_dir = os.path.abspath(os.curdir)
-            self.file_path_desc = os.path.join(current_dir, 'Export', f'Simulação_com_desc_{nome_cooperado[:20]}.pdf')
+            self.file_path_desc = os.path.join(current_dir, 'Export', self.email ,f'Simulação_com_desc_{nome_cooperado[:20]}.pdf')
         except:
             print("Falhar ao carregar o anexo")
 

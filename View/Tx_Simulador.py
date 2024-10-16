@@ -2,10 +2,12 @@ import streamlit as st
 import pandas as pd
 from Controllers.Export_PDF import Criar_PDF
 from Controllers.Sender import Sender_email
-from View.Tx_Diferenciada import Taxa_Diferenciada
+from Controllers.Query_Simulador import Simulacao
 
-class Simulador():
+class Simulador(Simulacao):
     def __init__(self):
+        Simulacao.__init__(self)
+        
         """Inicia a interface da página."""
         # Inicializa as variáveis
         self.tx_final = 0.0
@@ -26,17 +28,6 @@ class Simulador():
         self.inicializar_componentes()
         self.main()
             
-    def gravar_valores(self):
-        # Salvar valores na sessão do Streamlit
-        st.session_state['taxa'] = self.tx_final
-        st.session_state['tabela'] = self.tabela
-        st.session_state['natureza'] = self.natureza
-        st.session_state['risco'] = self.risco
-        st.session_state['linha'] = self.linha
-        st.session_state['n_linha'] = self.n_linha
-        st.session_state['prazo'] = self.prazo
-        st.session_state['nome'] = self.nome
-        
     def carregar_logo_e_titulo(self):
         """Carrega o logo e o título da página."""
         col1, col2, col3 = st.columns([0.4, 0.1, 1.5])
@@ -115,6 +106,37 @@ class Simulador():
             self.p_col1.metric("Taxa Balcão (a.m)", f"{tx_final}%")
             self.p_col2.metric("Taxa Balcão (a.a)", f"{round(100 * (((1 + (tx_final / 100)) ** 12) - 1), 2)}%")
 
+    def gravar_valores(self):
+        # Salvar valores na sessão do Streamlit
+        st.session_state['taxa'] = self.tx_final
+        st.session_state['tabela'] = self.tabela
+        st.session_state['natureza'] = self.natureza
+        st.session_state['risco'] = self.risco
+        st.session_state['linha'] = self.linha
+        st.session_state['n_linha'] = self.n_linha
+        st.session_state['prazo'] = self.prazo
+        st.session_state['nome'] = self.nome
+        
+        self.gravar_simulacao_BD()
+
+    def gravar_simulacao_BD(self):
+        """Grava a simulação no BD."""
+        
+        nome_ger = st.session_state['nome'] 
+        numero_pa = st.session_state['numero_pa']
+        nome_pa = st.session_state['nome_pa']
+        email = st.session_state['email']
+        taxa = st.session_state['taxa'] 
+        tabela = st.session_state['tabela']
+        natureza =st.session_state['natureza']
+        risco = st.session_state['risco']
+        linha = st.session_state['linha']
+        n_linuha = st.session_state['n_linha']
+        prazo = st.session_state['prazo']
+        nome_cli = st.session_state['nome'] 
+        
+        self.inserir_simulacao(nome_cli=nome_cli, nome_ger=nome_ger, nome_pa=nome_pa, num_pa=numero_pa, email=email, tx_final=taxa, tabela=tabela, natureza=natureza, risco=risco, linha=linha, n_linha=n_linuha, prazo=prazo)
+
     def gerenciar_exportacao_e_envio_email(self):
         """Gerencia as ações de exportar o PDF e enviar o e-mail."""
          # Criação de colunas para centralizar os botões
@@ -176,7 +198,7 @@ class Simulador():
                     st.error(f"Ocorreu um erro ao enviar o e-mail: {e}")
 
     def enviar_email(self):
-        email = Sender_email(nome_cooperado=self.nome, linha=self.linha, taxa=self.tx_final)
+        email = Sender_email(nome_cooperado=self.nome, linha=self.linha, taxa=self.tx_final, email=st.session_state['email'])
         return email.enviar()
 
     def campos_preenchidos(self):

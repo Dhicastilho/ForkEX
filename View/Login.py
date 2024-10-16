@@ -55,23 +55,22 @@ class Login():
         return False
     
     def logar(self):
-        if st.session_state['tela_ativa'] == 'login':
-            # Tela de Login
-            self.carregar_logo_e_titulo()
+        # Tela de Login
+        self.carregar_logo_e_titulo()
 
-            # Campo para E-mail
-            self.email = st.text_input("Email")
-            st.session_state['email'] = self.email
-            # Campo para Senha (oculta os caracteres)
-            senha = st.text_input("Senha", type="password")
+        # Campo para E-mail
+        self.email = st.text_input("Email")
+        st.session_state['email'] = self.email
+        # Campo para Senha (oculta os caracteres)
+        senha = st.text_input("Senha", type="password")
 
-            # Botão de Login
-            if st.button("Login"):
-                if self.verificar_login(self.email, senha):
-                    st.session_state['logged_in'] = True
-                    return True
-                else:
-                    st.error("Email ou senha incorretos. Tente novamente.")
+        # Botão de Login
+        if st.button("Login"):
+            if self.verificar_login(self.email, senha):
+                st.session_state['logged_in'] = True
+                return True
+            else:
+                st.error("Email ou senha incorretos. Tente novamente.")
 
     def registrar_novo_usuario(self):
         with st.expander("Registrar Usuário"):
@@ -116,16 +115,19 @@ class Login():
     def editar_usuario(self):
         with st.expander("Editar Usuário"):
             """Interface para editar email e/ou senha de um usuário."""
+            
             # Campo para o email antigo do usuário
-            email_antigo = st.text_input("Email do Usuário para editar")
+            email_antigo = st.text_input("Email do Usuário")
+            
+            st.info("Preencha os campos que deseja editar, caso deseje manter, deixe em branco!")
 
             # Campos para o novo email, nova senha, Nome, Número PA e Nome PA
-            email_novo = st.text_input("Novo Email (deixe em branco se não quiser mudar)")
-            senha_nova = st.text_input("Nova Senha (deixe em branco se não quiser mudar)", type="password")
-            nome = st.text_input("Nome (deixe em branco se não quiser mudar)")
-            numero_pa = st.text_input("Número PA (deixe em branco se não quiser mudar)")
-            nome_pa = st.text_input("Nome PA (deixe em branco se não quiser mudar)")
-            perfil = st.text_input("Perfil (deixe em branco se não quiser mudar)")
+            email_novo = st.text_input("Novo Email:")
+            senha_nova = st.text_input("Nova Senha:", type="password")
+            nome = st.text_input("Nome:")
+            numero_pa = st.text_input("Número PA:")
+            nome_pa = st.text_input("Nome PA:")
+            perfil = st.text_input("Perfil:")
 
             # Botão para editar o usuário
             if st.button("Editar Usuário"):

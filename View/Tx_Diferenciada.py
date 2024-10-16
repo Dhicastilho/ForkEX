@@ -3,7 +3,7 @@ from Controllers.Sender import Sender_email
 from Controllers.Export_PDF import Criar_PDF
 
 class Taxa_Diferenciada():
-    def __init__(self, tx, tabela, natureza, risco, linha, n_linha, prazo, nome):
+    def __init__(self, tx, tabela, natureza, risco, linha, n_linha, prazo, nome_cli):
         # Recebe a taxa simulada como argumento e define o valor máximo da taxa diferenciada
         self.tx_prec = tx
         self.tabela = tabela
@@ -12,7 +12,7 @@ class Taxa_Diferenciada():
         self.linha = linha
         self.n_linha = n_linha
         self.prazo = prazo
-        self.nome = nome
+        self.nome_cli = nome_cli
         self.tx_minima = round(tx * 0.9, 2)
         self.tx_desconto = 0.00
         
@@ -64,19 +64,24 @@ class Taxa_Diferenciada():
     
     def campos_preenchidos(self):
         """Verifica se todos os campos necessários estão preenchidos."""
-        return all([self.nome, self.tabela, self.natureza, self.risco, self.linha, self.n_linha, self.prazo])
+        return all([self.nome_cli, self.tabela, self.natureza, self.risco, self.linha, self.n_linha, self.prazo])
     
     def enviar_email(self):
         """Envia o e-mail com a taxa diferenciada solicitada."""
-        email = Sender_email(nome_cooperado=self.nome, linha=self.linha, taxa=self.tx_prec)
+        email = Sender_email(nome_cooperado=self.nome_cli, linha=self.linha, taxa=self.tx_prec, email=st.session_state['email'])
         email.enviar_com_desconto(tx_desconto)
           
     def gerar_exportacao_pdf(self):
         """Exporta a simulação para PDF."""
         if self.campos_preenchidos():
+            nome_ger = st.session_state.get('nome')
+            nome_pa = st.session_state.get('nome_pa')
+            num_pa = st.session_state.get('numero_pa')
+            email = st.session_state.get('email')
+            
             with st.spinner("Gerando PDF..."):
                 try:
-                    caminho_pdf = self.exportar_pdf(tx_desconto, self.tabela, self.natureza, self.risco, self.linha, self.n_linha, self.prazo, self.nome)
+                    caminho_pdf = self.exportar_pdf(tx_desconto, self.tabela, self.natureza, self.risco, self.linha, self.n_linha, self.prazo, self.nome_cli, nome_ger, nome_pa, num_pa, email)
                     st.success("PDF gerado com sucesso!")
                     
                     return caminho_pdf
@@ -84,10 +89,12 @@ class Taxa_Diferenciada():
                     st.error(f"Ocorreu um erro ao gerar o PDF: {e}")
     
     @staticmethod
-    def exportar_pdf(tx_desc, tabela, natureza, risco, linha, n_linha, prazo, nome):
+    def exportar_pdf(tx_desc, tabela, natureza, risco, linha, n_linha, prazo, nome_cli, nome_ger, nome_pa, num_pa, email):
         pdf = Criar_PDF()
         print(tx_desc)
-        return pdf.gerar_pdf_com_desc(tx_desc=tx_desc, tabela=tabela, natureza=natureza, risco=risco, linha=linha, n_linha=n_linha, prazo=prazo, nome=nome)
+        return pdf.gerar_pdf_com_desc(tx_desc=tx_desc, tabela=tabela, natureza=natureza, risco=risco, linha=linha, 
+                                      n_linha=n_linha, prazo=prazo, nome_cli=nome_cli, nome_ger=nome_ger, nome_pa=nome_pa, 
+                                      num_pa=num_pa, email=email)
     
     def carregar_rodape(self):
         """Carrega o rodapé da página."""
