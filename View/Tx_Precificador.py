@@ -46,7 +46,6 @@ class Precificador:
     def mostrar_precificador(self):
         self.exibir_cabecalho()
         self.main()
-        self.exibir_rodape()
         
     def exibir_cabecalho(self):
         #Título da Página e Logo
@@ -202,10 +201,6 @@ class Precificador:
             #RedutorTB  
             self.redutorTB_op = col2.text_input("Rebate da Taxa de Balcão (%)",
                     "0", key="redutorTB_op")
-
-    def exibir_rodape(self):
-        col1, col2, col3 = st.columns([1,3,1])
-        col2.markdown("<p style='text-align: center; color: #ffffff; font-size: 20px;'>Desenvolvido pela equipe de BI no departamento de Controladoria!</p>", unsafe_allow_html=True)
-
+            
 if __name__ == "__main__": 
     Precificador()

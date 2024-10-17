@@ -25,10 +25,9 @@ class Login():
 
     def carregar_logo_e_titulo(self):
         """Carrega o logo e o título da página."""
-        col1, col2 = st.columns([0.5, 2])
-        col1.image('Images/Logo.png', width=100, use_column_width="always")
-        col2.markdown("<h1 style='text-align: center; color: #C9D200;'>Login em Taxas de Crédito</h1>", unsafe_allow_html=True)
-
+        col1, col2, col3, col4, col5 = st.columns([0.5, 1, 1, 1, 0.5])
+        col3.image('Images/Logo.png', width=275)
+        
     def hash_senha(self, senha):
         """Retorna o hash SHA-256 da senha fornecida."""
         return hashlib.sha256(senha.encode()).hexdigest()
@@ -57,32 +56,37 @@ class Login():
     def logar(self):
         # Tela de Login
         self.carregar_logo_e_titulo()
-
+        
+        col1, col2, col3, col4, col5 = st.columns([0.5, 1, 1, 1, 0.5])
         # Campo para E-mail
-        self.email = st.text_input("Email")
+        self.email = col3.text_input("Email")
         st.session_state['email'] = self.email
         # Campo para Senha (oculta os caracteres)
-        senha = st.text_input("Senha", type="password")
+        senha = col3.text_input("Senha", type="password")
 
-        # Botão de Login
-        if st.button("Login"):
-            if self.verificar_login(self.email, senha):
-                st.session_state['logged_in'] = True
-                return True
-            else:
-                st.error("Email ou senha incorretos. Tente novamente.")
+        with col3:
+            col1,col2,col3 = st.columns(3)
+            # Botão de Login
+            if col2.button("Login"):
+                if self.verificar_login(self.email, senha):
+                    st.session_state['logged_in'] = True
+                    return True
+                else:
+                    st.error("Email ou senha incorretos. Tente novamente.")
 
     def registrar_novo_usuario(self):
         with st.expander("Registrar Usuário"):
             """Tela para registrar novos usuários."""
             
             # Campos de E-mail, Senha, Nome, Número PA e Nome PA para registro
-            email = st.text_input("Novo Email")
-            senha = st.text_input("Nova Senha", type="password")
-            nome = st.text_input("Nome")
-            numero_pa = st.text_input("Número PA")
-            nome_pa = st.text_input("Nome PA")
-            perfil = st.text_input("Perfil")
+            email = st.text_input("Email:")
+            senha = st.text_input("Senha:", type="password")
+            nome = st.text_input("Nome:")
+            numero_pa = st.selectbox("Número PA", ["1", "2", "3", "4", "5", "6", 
+                                    "7", "8", "9", "10", "11","97"], index=None)
+            nome_pa = st.selectbox("Nome PA:", ["Anápolis", "Castelo Branco", "OCB", "CASAG", "POA", "Caxias do Sul", 
+                                    "Goianira", "Cuiabá", "Campo Grande", "Taguatinga", "Sede","Digital"], index=None)
+            perfil = st.selectbox("Perfil:", ["user", "admin"])
             
             # Botão para registrar
             if st.button("Registrar"):
@@ -122,12 +126,14 @@ class Login():
             st.info("Preencha os campos que deseja editar, caso deseje manter, deixe em branco!")
 
             # Campos para o novo email, nova senha, Nome, Número PA e Nome PA
-            email_novo = st.text_input("Novo Email:")
-            senha_nova = st.text_input("Nova Senha:", type="password")
-            nome = st.text_input("Nome:")
-            numero_pa = st.text_input("Número PA:")
-            nome_pa = st.text_input("Nome PA:")
-            perfil = st.text_input("Perfil:")
+            email_novo = st.text_input("Email (Novo):")
+            senha_nova = st.text_input("Senha (Novo):", type="password")
+            nome = st.text_input("Nome (Novo):")
+            numero_pa = st.selectbox("Número PA (Novo):", ["1", "2", "3", "4", "5", "6", 
+                                    "7", "8", "9", "10", "11","97"], index=None)
+            nome_pa = st.selectbox("Nome PA (Novo):", ["Anápolis", "Castelo Branco", "OCB", "CASAG", "POA", "Caxias do Sul", 
+                                    "Goianira", "Cuiabá", "Campo Grande", "Taguatinga", "Sede","Digital"], index=None)
+            perfil = st.selectbox("Perfil (Novo):", ["user", "admin"])
 
             # Botão para editar o usuário
             if st.button("Editar Usuário"):

@@ -29,6 +29,11 @@ st.markdown(
     h1, h2, h3 {
         color: #7DB61C !important;
     }
+    
+    [data-testid="stImage"] a {
+        display: none;
+    }
+    
     p {
         color: #ffffff !important;
     }
@@ -91,12 +96,16 @@ class APP_GUI(Login, Simulacao):
     
     def navegar_paginas(self):
         """Controla a navegação entre as páginas"""
-        st.sidebar.markdown("### Informações da Agência")
-        st.sidebar.write(f"**Nome:** {st.session_state.get('nome', 'Nome não definido')}")
-        st.sidebar.write(f"**Agência:** {st.session_state.get('nome_pa', 'Agência não definida')} | Nº: {st.session_state.get('numero_pa', '999')}")
-        st.sidebar.write(f"**E-mail:** {st.session_state.get('email', 'E-mail não definido')}")
+        with st.sidebar:        
+            col1, col2, col3 = st.columns([0.25,1,0.25])
+            with col2:
+                st.image('Images/Logo.png', width=80, use_column_width="always")
+                st.write("")
+                st.write(f"**Nome:** {st.session_state.get('nome', 'Nome não definido')}")
+                st.write(f"**E-mail:** {st.session_state.get('email', 'E-mail não definido')}")
+                st.write(f"**Agência:** {st.session_state.get('nome_pa', 'Agência não definida')} | Nº: {st.session_state.get('numero_pa', '999')}")
 
-        pag = st.sidebar.selectbox("Escolha a página", ["Simulação de Taxa", "Solicitar Desconto de Taxa", "Mesa de Precificação", "Painel de Controle"])
+                pag = st.selectbox("Escolha a página", ["Simulação de Taxa", "Solicitar Desconto de Taxa", "Mesa de Precificação", "Painel de Controle"])
 
         if pag == "Simulação de Taxa":
             self.mostrar_simulador()
@@ -106,11 +115,14 @@ class APP_GUI(Login, Simulacao):
             self.mostrar_precificador()
         elif pag == "Painel de Controle":
             self.mostrar_painel_controle()
-
-        if st.sidebar.button("Sair"):
-            Lidar_Dir(st.session_state['email']).limpar_dir()
-            st.session_state.clear()
-            st.rerun()
+            
+        with col2:
+            if st.button("Sair"):
+                Lidar_Dir(st.session_state['email']).limpar_dir()
+                st.session_state.clear()
+                st.rerun()
+                
+            st.write("**Desenvolvido pela Equipe de Inteligência Operacional**")
             
     def mostrar_simulador(self):
         """Exibe a página de simulação de taxa"""

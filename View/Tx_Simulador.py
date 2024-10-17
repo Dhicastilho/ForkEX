@@ -52,12 +52,6 @@ class Simulador(Simulacao):
             st.error("O arquivo 'Base.xlsx' não foi encontrado.")
             st.stop()
 
-    def carregar_rodape_e_selo(self):
-        """Carrega o rodapé e o selo da página."""
-        col1, col2, col3 = st.columns([1, 3, 1])
-        col2.markdown("<p style='text-align: center; color: #C9D200; font-size: 20px;'></p>", unsafe_allow_html=True)
-        col2.markdown("<p style='text-align: center; color: #C9D200; font-size: 20px;'>Desenvolvido pela equipe de BI no departamento de Controladoria!</p>", unsafe_allow_html=True)
-
     def main(self):
         """Função principal que gerencia a lógica da interface."""
         self.natureza = self.m_col2.selectbox("Natureza", ["Pré-fixada", "Pós-fixada"], index=None, placeholder="Escolha uma natureza")
@@ -80,8 +74,6 @@ class Simulador(Simulacao):
 
         # Gerencia as ações de exportar e enviar e-mail
         self.gerenciar_exportacao_e_envio_email()
-        # Carrega o rodapé e o selo da página
-        self.carregar_rodape_e_selo()
 
     def calcular_taxa_final(self, dados, natureza, risco):
         """Calcula a taxa final com base na natureza e no risco."""
