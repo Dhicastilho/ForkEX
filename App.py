@@ -1,9 +1,9 @@
 import streamlit as st
 import pandas as pd
-from View.Tx_Simulador import Simulador
-from View.Tx_Diferenciada import Taxa_Diferenciada
-from View.Tx_Precificador import Precificador
-from View.Login import Login
+from Views.Tx_Simulador import Simulador
+from Views.Tx_Diferenciada import Taxa_Diferenciada
+from Views.Tx_Precificador import Precificador
+from Views.Login import Login
 from Controllers.Handler_Export import Lidar_Dir
 from Controllers.Query_Simulador import Simulacao
 
@@ -99,7 +99,7 @@ class APP_GUI(Login, Simulacao):
         with st.sidebar:        
             col1, col2, col3 = st.columns([0.25,1,0.25])
             with col2:
-                st.image('Images/Logo.png', width=80, use_column_width="always")
+                st.image('Images/Logo_side.png', width=80, use_column_width="always")
                 st.write("")
                 st.write(f"**Nome:** {st.session_state.get('nome', 'Nome não definido')}")
                 st.write(f"**E-mail:** {st.session_state.get('email', 'E-mail não definido')}")
