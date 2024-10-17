@@ -1,0 +1,35 @@
+{
+	"folders": {},
+	"connections": {
+		"duckdb_jdbc-1929180bfa2-3e88a4b3908b35c8": {
+			"provider": "generic",
+			"driver": "duckdb_jdbc",
+			"name": "bd_prec.db",
+			"save-password": true,
+			"configuration": {
+				"database": "C:\\Users\\matheus.carmo\\Desktop\\PREC\\Data\\bd_prec.db",
+				"url": "jdbc:duckdb:C:\\Users\\matheus.carmo\\Desktop\\PREC\\Data\\bd_prec.db",
+				"configurationType": "MANUAL",
+				"type": "dev",
+				"closeIdleConnection": true,
+				"auth-model": "native"
+			}
+		}
+	},
+	"connection-types": {
+		"dev": {
+			"name": "Desenvolvimento",
+			"color": "255,255,255",
+			"description": "Banco de dados de desenvolvimento",
+			"auto-commit": true,
+			"confirm-execute": false,
+			"confirm-data-change": false,
+			"smart-commit": false,
+			"smart-commit-recover": true,
+			"auto-close-transactions": true,
+			"close-transactions-period": 1800,
+			"auto-close-connections": true,
+			"close-connections-period": 14400
+		}
+	}
+}

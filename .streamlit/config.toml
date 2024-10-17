@@ -1,0 +1,19 @@
+[theme]
+primaryColor = "#7DB61C"
+backgroundColor = "#161a1a"
+secondaryBackgroundColor = "#003641"
+textColor = "#ffffff"
+font = "sans serif"
+
+[server]
+headless = true
+port = 80
+enableCORS = false
+enableWebsocketCompression = false
+
+
+# Tempo limite de sessão em segundos (valor padrão: 3600)
+cookieExpirationDays = 30
+
+# Desativa a verificação de porta aberta (útil para servidores compartilhados)
+enableXsrfProtection = false
