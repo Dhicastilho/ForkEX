@@ -3,6 +3,7 @@ import pandas as pd
 from Controllers.Export_PDF import Criar_PDF
 from Controllers.Sender import Sender_email
 from Controllers.Query_Simulador import Simulacao
+from Controllers.Calculator import Calcular_CET
 
 class Simulador(Simulacao):
     def __init__(self):
@@ -18,6 +19,11 @@ class Simulador(Simulacao):
         self.n_linha = ""
         self.prazo = ""
         self.nome = ""
+        self.defesa = ""
+        self.saldo_dev = 0.0
+        self.prazo_op = 0.0
+        self.parcela = 0.0
+        self.CET = 0.0
 
         # Inicializa a tela ativa no estado da sessão (tela padrão: Simulação)
         if 'tela_ativa' not in st.session_state:
@@ -42,7 +48,7 @@ class Simulador(Simulacao):
             self.tabela = self.m_col1.selectbox("Tipo de Tabela", ["PF", "PJ", "FCOeBNDES", "FBL"])
             self.dados = self.carregar_dados_tabela(self.tabela)
 
-        self.p_col1, self.p_col2 = st.columns(2)
+        self.p_col1, self.p_col2, self.p_col3, self.p_col4, self.p_col5, self.p_col6 = st.columns(6)
 
     def carregar_dados_tabela(self, tabela):
         """Carrega os dados de acordo com o tipo de tabela selecionado."""
@@ -65,16 +71,45 @@ class Simulador(Simulacao):
         
         self.prazo = self.m_col3.selectbox("Prazo", dados_filtrados["PRAZO"].unique(), index=None, placeholder="Escolha o prazo")
         dados_filtrados = dados_filtrados[dados_filtrados["PRAZO"] == self.prazo]
+        
+        self.saldo_dev = self.m_col1.text_input("Valor da Operação", placeholder="Insira o valor da operaçãos em R$")
+        self.prazo_op = self.m_col2.text_input("Prazo da Operação", placeholder="Insira o prazo da operaçãos em meses")
+        self.tabela_op = self.m_col3.selectbox("Tabela da Operação:",["SAC", "PRICE"], index=None, placeholder="Escolha uma tabela para a operação")
+        
+        calc = Calcular_CET()
+
+        try:
+            # Calcula o IOF
+            iof = calc.calcular_iof(float(self.saldo_dev), int(self.prazo_op))
+            
+            # Verifica o tipo de tabela selecionado (SAC ou Price)
+            if self.tabela_op == "SAC":
+                self.parcela = calc.calcular_sac(float(self.saldo_dev), float(self.tx_final), int(self.prazo_op), iof)
+                
+                print(self.parcela)  # Exibe todas as parcelas
+                
+                self.CET = calc.calcular_CET(float(self.tx_final), int(self.prazo_op), iof)
+            else:
+                self.parcela = calc.calcular_price(float(self.saldo_dev), float(self.tx_final), int(self.prazo_op), iof)
+                print(self.parcela)  # Exibe a parcela fixa (Price)
+                self.CET = calc.calcular_CET(float(self.tx_final), int(self.prazo_op), iof)
+
+            # Exibe o resultado do CET
+            st.write(f"CET calculado: {self.CET:.2f}")
+            
+        except Exception as e:
+            print("")
+        
+        self.defesa = st.text_area("Defesa da Proposta", height=200)
 
         if self.campos_preenchidos():
             self.tx_final = self.calcular_taxa_final(dados_filtrados, self.natureza, self.risco)
-            self.exibir_taxas(self.tx_final)
-        else:
-            st.success("Por favor, preencha todos os campos para calcular a taxa!")
+            self.exibir_taxas(tx_final=self.tx_final, CET=self.CET, parcela=self.parcela, saldo_dev=self.saldo_dev, prazo_op=self.prazo_op)
 
         # Gerencia as ações de exportar e enviar e-mail
         self.gerenciar_exportacao_e_envio_email()
-
+    	
+     
     def calcular_taxa_final(self, dados, natureza, risco):
         """Calcula a taxa final com base na natureza e no risco."""
         if self.campos_preenchidos():
@@ -88,15 +123,24 @@ class Simulador(Simulacao):
         """Calcula a taxa com base no risco e retorna o valor arredondado."""
         return round(pd.to_numeric(dados[nome_coluna]).sum() * 100, 2)
 
-    def exibir_taxas(self, tx_final):
+    def exibir_taxas(self, tx_final, CET, parcela, saldo_dev, prazo_op):
         """Exibe as taxas calculadas na interface."""
         if tx_final:
-            self.p_col1.metric("Taxa Balcão (a.m)", f"{tx_final}%")
-            self.p_col2.metric("Taxa Balcão (a.a)", f"{round(100 * (((1 + (tx_final / 100)) ** 12) - 1), 2)}%")
+            self.p_col1.metric("Taxa Balcão (a.m)", f"{tx_final} %")
+            self.p_col2.metric("Taxa Balcão (a.a)", f"{round(100 * (((1 + (tx_final / 100)) ** 12) - 1), 2)} %")
+            self.p_col3.metric("CET (a.m)", f"{CET} %")
+            self.p_col4.metric("Saldo Devedor", f"{float(saldo_dev):,.2f} R$")
+            self.p_col5.metric("Parcela", f"{float(parcela):,.2f} R$")
+            self.p_col6.metric("Prazo", f"{prazo_op} meses")
+            
         else:
             tx_final = 0
             self.p_col1.metric("Taxa Balcão (a.m)", f"{tx_final}%")
             self.p_col2.metric("Taxa Balcão (a.a)", f"{round(100 * (((1 + (tx_final / 100)) ** 12) - 1), 2)}%")
+            self.p_col3.metric("CET (a.m)", f"{CET} %")
+            self.p_col4.metric("Saldo Devedor", f"{float(saldo_dev):,.2f} R$")
+            self.p_col5.metric("Parcela", f"{float(parcela):,.2f} R$")
+            self.p_col6.metric("Prazo", f"{prazo_op} meses")
 
     def gravar_valores(self):
         # Salvar valores na sessão do Streamlit
@@ -108,6 +152,7 @@ class Simulador(Simulacao):
         st.session_state['n_linha'] = self.n_linha
         st.session_state['prazo'] = self.prazo
         st.session_state['nome_cli'] = self.nome
+        st.session_state["defesa"] = self.defesa
 
     def gravar_simulacao_BD(self):
         """Grava a simulação no BD."""
@@ -124,8 +169,9 @@ class Simulador(Simulacao):
         n_linuha = st.session_state['n_linha']
         prazo = st.session_state['prazo']
         nome_cli = st.session_state['nome_cli'] 
+        defesa = st.session_state["defesa"]
         
-        self.inserir_simulacao(nome_cli=nome_cli, nome_ger=nome_ger, nome_pa=nome_pa, num_pa=numero_pa, email=email, tx_final=taxa, tabela=tabela, natureza=natureza, risco=risco, linha=linha, n_linha=n_linuha, prazo=prazo)
+        self.inserir_simulacao(nome_cli=nome_cli, nome_ger=nome_ger, nome_pa=nome_pa, num_pa=numero_pa, email=email, tx_final=taxa, tabela=tabela, natureza=natureza, risco=risco, linha=linha, n_linha=n_linuha, prazo=prazo, defesa=defesa)
 
     def gerenciar_exportacao_e_envio_email(self):
         """Gerencia as ações de exportar o PDF e enviar o e-mail."""
@@ -169,7 +215,7 @@ class Simulador(Simulacao):
                     caminho_pdf = self.exportar_pdf(tx_final=self.tx_final, tabela=self.tabela, natureza=self.natureza, 
                                                     risco=self.risco, linha=self.linha, n_linha=self.n_linha, prazo=self.prazo, 
                                                     nome_cli=self.nome, nome_ger=nome_ger, num_pa=numero_pa, nome_pa=nome_pa, 
-                                                    email=email)
+                                                    email=email, defesa=self.defesa)
                     st.success("PDF gerado com sucesso!")
                     
                     return caminho_pdf
@@ -177,11 +223,11 @@ class Simulador(Simulacao):
                     st.error(f"Ocorreu um erro ao gerar o PDF: {e}")
 
     @staticmethod
-    def exportar_pdf(tx_final, tabela, natureza, risco, linha, n_linha, prazo, nome_cli, nome_ger, nome_pa, num_pa, email):
+    def exportar_pdf(tx_final, tabela, natureza, risco, linha, n_linha, prazo, nome_cli, nome_ger, nome_pa, num_pa, email, defesa):
         pdf = Criar_PDF()
         return pdf.gerar_pdf(tx_final=tx_final, tabela=tabela, natureza=natureza, risco=risco, 
                              linha=linha, n_linha=n_linha, prazo=prazo, nome_cli=nome_cli, 
-                             nome_ger=nome_ger, nome_pa=nome_pa, num_pa=num_pa, email=email )
+                             nome_ger=nome_ger, nome_pa=nome_pa, num_pa=num_pa, email=email, defesa=defesa)
 
     def enviar_simulacao_email(self):
         """Envia a simulação por e-mail."""
@@ -199,7 +245,7 @@ class Simulador(Simulacao):
 
     def campos_preenchidos(self):
         """Verifica se todos os campos necessários estão preenchidos."""
-        return all([self.nome, self.tabela, self.natureza, self.risco, self.linha, self.n_linha, self.prazo])
+        return all([self.nome, self.tabela, self.natureza, self.risco, self.linha, self.n_linha, self.prazo, self.defesa])
 
 if __name__ == "__main__":
     Simulador()

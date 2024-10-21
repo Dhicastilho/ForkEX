@@ -4,6 +4,7 @@ from Views.Tx_Simulador import Simulador
 from Views.Tx_Diferenciada import Taxa_Diferenciada
 from Views.Tx_Precificador import Precificador
 from Views.Login import Login
+from Views.Cons_Simulador import Consulta_Simulacao
 from Controllers.Handler_Export import Lidar_Dir
 from Controllers.Query_Simulador import Simulacao
 
@@ -60,6 +61,7 @@ class APP_GUI(Login, Simulacao):
     def __init__(self): 
         Login.__init__(self)
         Simulacao.__init__(self)
+        self.consulta = Consulta_Simulacao()
         
         self.simulador = None
         self.inicializar_sessao()
@@ -105,7 +107,7 @@ class APP_GUI(Login, Simulacao):
                 st.write(f"**E-mail:** {st.session_state.get('email', 'E-mail não definido')}")
                 st.write(f"**Agência:** {st.session_state.get('nome_pa', 'Agência não definida')} | Nº: {st.session_state.get('numero_pa', '999')}")
 
-                pag = st.selectbox("Escolha a página", ["Simulação de Taxa", "Solicitar Desconto de Taxa", "Mesa de Precificação", "Painel de Controle"])
+                pag = st.selectbox("Escolha a página", ["Simulação de Taxa", "Solicitar Desconto de Taxa", "Consultar Simulações", "Mesa de Precificação", "Painel de Controle"])
 
         if pag == "Simulação de Taxa":
             self.mostrar_simulador()
@@ -113,8 +115,11 @@ class APP_GUI(Login, Simulacao):
             self.mostrar_tx_diferenciada()
         elif pag == "Mesa de Precificação":
             self.mostrar_precificador()
+        elif pag == "Consultar Simulações":
+            self.consulta.mostrar_reg_simul()
         elif pag == "Painel de Controle":
             self.mostrar_painel_controle()
+       
             
         with col2:
             if st.button("Sair"):
@@ -140,9 +145,9 @@ class APP_GUI(Login, Simulacao):
                 
                 if simulacoes:
                     # Converte a lista de tuplas em um DataFrame do Pandas para exibição
-                    df = pd.DataFrame(simulacoes, columns=['n_sim', 'tx_final', 'tabela', 'natureza', 
-                                                           'risco', 'linha', 'n_linha', 'prazo', 'nome_cli', 
-                                                           'nome_ger', 'nome_pa', 'num_pa', 'email'])
+                    df = pd.DataFrame(simulacoes, columns=['Nº SIM', 'Taxa', 'Tabela', 'Natureza', 
+                                                           'Risco', 'Linha', 'Nº Linha', 'Prazo', 'Nome Cliente', 
+                                                           'Nome Gerente', 'Nome PA', 'Nº PA', 'Email', "Defesa"])
 
                     # Exibe a tabela com os usuários usando dataframe
                     st.dataframe(df.style.hide(axis='index'), use_container_width=True)

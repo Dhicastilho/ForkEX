@@ -18,23 +18,27 @@ class Simulacao():
                 nome_ger TEXT,
                 nome_pa TEXT,
                 num_pa TEXT,
-                email TEXT
+                email TEXT,
+                defesa TEXT
             )
         ''')
 
-    def inserir_simulacao(self, tx_final, tabela, natureza, risco, linha, n_linha, prazo, nome_cli, nome_ger, nome_pa, num_pa, email):  
+    def inserir_simulacao(self, tx_final, tabela, natureza, risco, linha, n_linha, prazo, nome_cli, nome_ger, nome_pa, num_pa, email, defesa):  
         self.conn.execute('''
             INSERT INTO simulacao
             VALUES
             (
                 (SELECT COALESCE(MAX(n_sim), 0) + 1 FROM simulacao),
-                ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?
+                ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?
             )
-        ''', (tx_final, tabela, natureza, risco, linha, n_linha, prazo, nome_cli, nome_ger, nome_pa, num_pa, email))
+        ''', (tx_final, tabela, natureza, risco, linha, n_linha, prazo, nome_cli, nome_ger, nome_pa, num_pa, email, defesa))
         self.conn.commit()
 
     def ler_simulacao(self):    
         return self.conn.execute('SELECT * FROM simulacao').fetchall()
+    
+    def ler_simulacao_PorEmail(self, email):    
+        return self.conn.execute('SELECT * FROM simulacao where email = ?',{email}).fetchall()
 
     def deletar_simulacao(self):
         self.conn.execute('DELETE FROM simulacao')  

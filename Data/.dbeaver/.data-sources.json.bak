@@ -14,20 +14,6 @@
 				"closeIdleConnection": true,
 				"auth-model": "native"
 			}
-		},
-		"duckdb_jdbc-192b0599d8d-2b22d9c2cd73243b": {
-			"provider": "generic",
-			"driver": "duckdb_jdbc",
-			"name": "bd_prec.db 2",
-			"save-password": true,
-			"configuration": {
-				"database": "C:\\Users\\matheus.carmo\\Desktop\\PREC\\Data\\bd_prec.db",
-				"url": "jdbc:duckdb:C:\\Users\\matheus.carmo\\Desktop\\PREC\\Data\\bd_prec.db",
-				"configurationType": "MANUAL",
-				"type": "dev",
-				"closeIdleConnection": true,
-				"auth-model": "native"
-			}
 		}
 	},
 	"connection-types": {
