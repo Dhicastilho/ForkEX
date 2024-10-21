@@ -35,6 +35,9 @@ class Simulacao():
 
     def ler_simulacao(self):    
         return self.conn.execute('SELECT * FROM simulacao').fetchall()
+    
+    def ler_simulacao_PorEmail(self, email):    
+        return self.conn.execute('SELECT * FROM simulacao where email = ?',{email}).fetchall()
 
     def deletar_simulacao(self):
         self.conn.execute('DELETE FROM simulacao')  
