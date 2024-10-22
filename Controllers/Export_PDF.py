@@ -6,7 +6,7 @@ class Criar_PDF():
     def __init__(self):
         self.fpdf = FPDF()
 
-    def gerar_pdf(self, tx_final, tabela, natureza, risco, linha, n_linha, prazo, nome_cli, nome_ger, nome_pa, num_pa, email):
+    def gerar_pdf(self, tx_final, tabela, natureza, risco, linha, n_linha, prazo, nome_cli, nome_ger, nome_pa, num_pa, email, defesa):
         self.fpdf.add_page()
 
         current_dir = os.path.abspath(os.curdir)
@@ -32,7 +32,7 @@ class Criar_PDF():
         self.fpdf.image(temp_logo_path, x=x_centered, y=8, w=logo_width)
 
         # Adicionar o restante do conteúdo ao PDF
-        self.fpdf.set_font('Times', 'B', 16)
+        self.fpdf.set_font('Times', 'B', 14)
         self.fpdf.cell(200, 12, '', ln=True, align='C')
         self.fpdf.cell(200, 12, '', ln=True, align='C')
         self.fpdf.cell(200, 13, 'Simulação de Taxa Padrão Pré-Precificada', ln=True, align='C')
@@ -49,10 +49,22 @@ class Criar_PDF():
         self.fpdf.cell(0, 10, f'Prazo: {prazo}', ln=True)
         self.fpdf.cell(0, 10, f'Taxa Final (a.m): {tx_final}%', ln=True)
         self.fpdf.cell(0, 10, f'Taxa Final (a.a): {round(100 * (((1 + (float(tx_final) / 100)) ** 12) - 1), 2)}%', ln=True)
+        self.fpdf.multi_cell(0, 10, f"Defesa da Proposta: {defesa}")
         self.fpdf.cell(0, 10, "", ln=True)
         self.fpdf.cell(0, 10, f"Gerente: {nome_ger}", ln=True)
         self.fpdf.cell(0, 10, f"Agência: {nome_pa} | {num_pa}", ln=True)
-        self.fpdf.cell(0, 10, f"Entre em Contato com seu gerente: {email}", ln=True)
+        self.fpdf.cell(0, 10, f"Entre em contato com seu gerente: {email}", ln=True)
+        
+        
+        disclaimer = """
+            Este simulador é uma ferramenta meramente ilustrativa, desenvolvida para auxiliar na simulação de taxas de juros para as linhas de crédito disponíveis. Os cálculos das parcelas, saldo devedor e taxas estão sujeitos à alteração, e estão baseados no CDI vigente. Ressaltamos que este simulador não representa garantia de aprovação de crédito, estando sujeito à análise de crédito. Os resultados apresentados podem variar de acordo com as condições do mercado financeiro, as políticas da cooperativa e outros fatores externos. O CET pode ser alterado a qualquer momento, e poderá ser diferente daquela aqui demonstrada.
+        """
+        
+        self.fpdf.cell(0, 10, "", ln=True)
+        
+        self.fpdf.set_font('Arial', 'I', 9)
+        # Utilize multi_cell para lidar com o texto longo
+        self.fpdf.multi_cell(0, 9, f"Atenção: {disclaimer}")
         
         # Salvar PDF
         pdf_path = f'Export/{email}/Simulação_{nome_cli[:20]}.pdf'

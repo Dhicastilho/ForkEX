@@ -44,6 +44,8 @@ class Sender_email(Yaml_Con):
             
             email.To = email_dest
             email.Subject = assunto
+            email.CC = self.email
+            
             
             email.HTMLBody = f"""
             <p style='font-family:Montserrat; font-size:110%'> Prezado, {nome}!</p>
