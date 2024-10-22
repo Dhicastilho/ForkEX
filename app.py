@@ -4,7 +4,7 @@ from Views.Tx_Simulador import Simulador
 from Views.Tx_Diferenciada import Taxa_Diferenciada
 from Views.Tx_Precificador import Precificador
 from Views.Login import Login
-from Views.Cons_sim import Consulta_Simulacao
+from Views.Cons_Simulador import Consulta_Simulacao
 from Controllers.Handler_Export import Lidar_Dir
 from Controllers.Query_Simulador import Simulacao
 
@@ -145,9 +145,9 @@ class APP_GUI(Login, Simulacao):
                 
                 if simulacoes:
                     # Converte a lista de tuplas em um DataFrame do Pandas para exibição
-                    df = pd.DataFrame(simulacoes, columns=['n_sim', 'tx_final', 'tabela', 'natureza', 
-                                                           'risco', 'linha', 'n_linha', 'prazo', 'nome_cli', 
-                                                           'nome_ger', 'nome_pa', 'num_pa', 'email'])
+                    df = pd.DataFrame(simulacoes, columns=['Nº SIM', 'Taxa', 'Tabela', 'Natureza', 
+                                                           'Risco', 'Linha', 'Nº Linha', 'Prazo', 'Nome Cliente', 
+                                                           'Nome Gerente', 'Nome PA', 'Nº PA', 'Email', "Defesa"])
 
                     # Exibe a tabela com os usuários usando dataframe
                     st.dataframe(df.style.hide(axis='index'), use_container_width=True)

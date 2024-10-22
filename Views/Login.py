@@ -197,10 +197,12 @@ class Login():
         except Exception as e:
             st.error(f"Erro ao recuperar usuários: {str(e)}")
 
+
 """
 if __name__ == "__main__":
     Login()
-    Login().registrar_usuario(email="matheusVC", senha="123", nome="Matheus Vicente", numero_pa="99", nome_pa="UAD", perfil="user") 
-    
+    Login().registrar_usuario(email="admin", senha="123", nome="Matheus Vicente", numero_pa="99", nome_pa="UAD", perfil="admin") 
 """
+
+
 
